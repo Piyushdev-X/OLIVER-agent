@@ -1,0 +1,69 @@
+{
+  "model": "scripted mock",
+  "tasks": 6,
+  "resolved": 6,
+  "claimed_resolved": 6,
+  "total_tokens": 59573,
+  "rows": [
+    {
+      "task": "config_merge",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 6,
+      "tokens": 7990,
+      "cost": 0.0,
+      "attempts": 0,
+      "seconds": 1.67
+    },
+    {
+      "task": "inventory_total",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 10,
+      "tokens": 16106,
+      "cost": 0.0,
+      "attempts": 1,
+      "seconds": 2.41
+    },
+    {
+      "task": "leap_year",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 6,
+      "tokens": 7302,
+      "cost": 0.0,
+      "attempts": 0,
+      "seconds": 1.82
+    },
+    {
+      "task": "stats_average",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 8,
+      "tokens": 10651,
+      "cost": 0.0,
+      "attempts": 0,
+      "seconds": 1.99
+    },
+    {
+      "task": "text_slugify",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 8,
+      "tokens": 10692,
+      "cost": 0.0,
+      "attempts": 0,
+      "seconds": 1.29
+    },
+    {
+      "task": "word_count",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 6,
+      "tokens": 6832,
+      "cost": 0.0,
+      "attempts": 0,
+      "seconds": 1.27
+    }
+  ]
+}
