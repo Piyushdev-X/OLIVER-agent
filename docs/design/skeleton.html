@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>OLIVER · Layout skeleton</title>
+  <link rel="stylesheet" href="oliver.css">
+  <style>
+    /* Schema-only helper: visualises grid spans on this page. */
+    .schema-block {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #F6E4DA;
+      border: 1px solid #D6CCBC;
+      border-radius: 6px;
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 600;
+      color: #8E4526;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER: 96px tall, brand (460px) + dedicated logo rail (460px) -->
+  <header class="site-header">
+    <div class="brand">
+      <p class="wordmark">OLIVER</p>
+      <p class="wordmark-sub">AI Coding Harness · layout skeleton</p>
+    </div>
+    <div class="logo-rail" aria-label="Organization logos">
+      <div class="logo-slot is-empty"><span class="logo-slot-label">LCC logo</span></div>
+      <div class="logo-slot is-empty"><span class="logo-slot-label">DevClub logo</span></div>
+      <div class="logo-slot is-empty"><span class="logo-slot-label">Team logo</span></div>
+    </div>
+  </header>
+
+  <!-- NAV: 48px tall, static anchor links -->
+  <nav class="doc-nav" aria-label="Sections">
+    <a href="#grid">Grid</a>
+    <a href="#figure">Figure frame</a>
+    <a href="#components">Components</a>
+    <a href="#report">Report figures</a>
+  </nav>
+
+  <!-- MAIN: padding 48px 10px 64px, content width 940px -->
+  <main class="content">
+
+    <section class="hero">
+      <p class="eyebrow">Layout schema · fixed desktop view</p>
+      <h1>Page skeleton</h1>
+      <p class="lead">One rigid container: a 960px page centred on the paper background, a 940px content column, and a 12-column grid. No breakpoints, no fluid widths, no chronological tracks.</p>
+      <div class="meta-row">
+        <span class="badge">960px page</span>
+        <span class="badge">940px content</span>
+        <span class="badge">12 × 60px columns</span>
+        <span class="badge">20px gutters</span>
+      </div>
+    </section>
+
+    <h2 id="grid">Grid spans</h2>
+    <div class="grid-12">
+      <div class="span-12 schema-block">span-12 · 940px</div>
+      <div class="span-8 schema-block">span-8 · 620px</div>
+      <div class="span-4 schema-block">span-4 · 300px</div>
+      <div class="span-6 schema-block">span-6 · 460px</div>
+      <div class="span-6 schema-block">span-6 · 460px</div>
+      <div class="span-3 schema-block">span-3 · 220px</div>
+      <div class="span-3 schema-block">span-3 · 220px</div>
+      <div class="span-3 schema-block">span-3 · 220px</div>
+      <div class="span-3 schema-block">span-3 · 220px</div>
+    </div>
+
+    <h2 id="figure">Figure frame</h2>
+    <figure class="figure">
+      <div class="figure-frame">
+        <div class="figure-canvas blueprint">
+          <div class="figure-placeholder">Diagram area · inline SVG · 936 × 556 · 24px blueprint grid</div>
+          <div class="title-block" aria-label="Drawing title block with organization logos">
+            <div class="title-block-logos">
+              <div class="logo-slot logo-slot-sm is-empty"><span class="logo-slot-label">LCC</span></div>
+              <div class="logo-slot logo-slot-sm is-empty"><span class="logo-slot-label">DevClub</span></div>
+            </div>
+            <div class="title-block-meta">
+              <strong>OLIVER</strong>
+              Sheet 1/2<br>
+              Rev A
+            </div>
+          </div>
+        </div>
+      </div>
+      <figcaption>Every diagram sits in a 940px frame with a 2px ink border. The bottom-right title block (300 × 88, inset 16px) is the dedicated logo space inside diagrams; nodes never overlap it.</figcaption>
+    </figure>
+
+    <h2 id="components">Components</h2>
+
+    <h3>Buttons</h3>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="#components">Open report</a>
+      <a class="btn btn-secondary" href="#components">Download patch</a>
+      <a class="btn btn-ghost" href="#components">View trajectory</a>
+      <span class="btn is-disabled" aria-disabled="true">Re-run</span>
+    </div>
+
+    <h3>Status indicators</h3>
+    <div class="meta-row">
+      <span class="badge badge-pass">✓ Pass</span>
+      <span class="badge badge-fail">✕ Fail</span>
+      <span class="badge badge-error">! Error</span>
+      <span class="badge badge-skip">– Skipped</span>
+      <span class="badge badge-running">… Running</span>
+    </div>
+    <div class="meta-row">
+      <span class="status"><span class="status-dot is-pass"></span>Verified</span>
+      <span class="status"><span class="status-dot is-fail"></span>Regression</span>
+      <span class="status"><span class="status-dot is-skip"></span>Timed out</span>
+      <span class="status"><span class="status-dot is-running"></span>Verifying</span>
+    </div>
+
+    <h3>Callouts</h3>
+    <div class="callout">
+      <p class="callout-title">Evidence over claims</p>
+      <p>OLIVER marks a task done only after its own verification run passes.</p>
+    </div>
+    <div class="callout callout-info">
+      <p class="callout-title">Note</p>
+      <p>Inline code looks like <code>run_agent_loop(task, repo_path)</code>.</p>
+    </div>
+
+    <h3>Code block</h3>
+    <div class="code-block">
+      <div class="code-title"><span>oliver/main.py</span><span>python</span></div>
+      <pre><code>python3 -m oliver.main --repo ./target --task-file issue.md</code></pre>
+    </div>
+
+    <h3>Diff block</h3>
+    <div class="code-block">
+      <div class="code-title"><span>patch.diff</span><span>1 file changed</span></div>
+      <div class="diff">
+        <div class="diff-line diff-meta">--- a/calc.py</div>
+        <div class="diff-line diff-meta">+++ b/calc.py</div>
+        <div class="diff-line diff-hunk">@@ -1,3 +1,3 @@</div>
+        <div class="diff-line"> def average(values):</div>
+        <div class="diff-line diff-del">-    return sum(values) / len(values) + 1</div>
+        <div class="diff-line diff-add">+    return sum(values) / len(values)</div>
+      </div>
+    </div>
+
+    <h3>Table</h3>
+    <table class="table">
+      <thead>
+        <tr><th>Test</th><th>Baseline</th><th>Final</th><th class="num">Duration</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">tests/test_calc.py::test_average</td><td><span class="badge badge-fail">✕ Fail</span></td><td><span class="badge badge-pass">✓ Pass</span></td><td class="num">0.02s</td></tr>
+        <tr><td class="mono">tests/test_calc.py::test_total</td><td><span class="badge badge-pass">✓ Pass</span></td><td><span class="badge badge-pass">✓ Pass</span></td><td class="num">0.01s</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="report">Report figures</h2>
+    <div class="kpi-row">
+      <div class="kpi"><p class="kpi-label">Status</p><p class="kpi-value">Resolved</p><p class="kpi-sub"><span class="status"><span class="status-dot is-pass"></span>verified by tests</span></p></div>
+      <div class="kpi"><p class="kpi-label">Tests passing</p><p class="kpi-value">12 / 12</p><p class="kpi-sub">1 fixed, 0 broken</p></div>
+      <div class="kpi"><p class="kpi-label">Tokens used</p><p class="kpi-value">18.4K</p><p class="kpi-sub">7 model calls</p></div>
+      <div class="kpi"><p class="kpi-label">Wall time</p><p class="kpi-value">2m 41s</p><p class="kpi-sub">budget 15m</p></div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER: 2px ink rule, credits left, logo rail right -->
+  <footer class="site-footer">
+    <div class="footer-credits">
+      <p><strong>OLIVER</strong> · AI Coding Harness</p>
+      <p>Built for the LCC × DevClub AI Coding Harness Hackathon.</p>
+    </div>
+    <div class="footer-logos" aria-label="Organization logos">
+      <div class="logo-slot logo-slot-sm is-empty"><span class="logo-slot-label">LCC</span></div>
+      <div class="logo-slot logo-slot-sm is-empty"><span class="logo-slot-label">DevClub</span></div>
+      <div class="logo-slot logo-slot-sm is-empty"><span class="logo-slot-label">Team</span></div>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
