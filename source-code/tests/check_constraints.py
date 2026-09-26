@@ -1,6 +1,6 @@
-"""Constraint checker for the OLIVER codebase.
+"""Constraint checker for the OLIVER repository (run by `make test`).
 
-Every rule below is a hard hackathon constraint. The banned tokens are
+Every rule below is a hard project constraint. The banned tokens are
 assembled from fragments at runtime so this file passes its own scan.
 
   R0  Python files must parse
@@ -14,20 +14,20 @@ assembled from fragments at runtime so this file passes its own scan.
   R7  no CSS custom property declarations in web files
   R8  no chronological track ('time' + 'line') elements outside Markdown
   R9  no retired project names anywhere (the product is branded OLIVER)
+  R10 no hard-coded credentials: API keys, access tokens or an assigned
+      AI_API_KEY value (the key is only ever read from the environment)
 
 Usage:
-  python3 scripts/check_constraints.py            scan the whole repository
-  python3 scripts/check_constraints.py FILE ...   scan specific files
-  python3 scripts/check_constraints.py --hook     Claude Code PostToolUse mode
+  python3 source-code/tests/check_constraints.py            scan the whole repository
+  python3 source-code/tests/check_constraints.py PATH ...   scan files or directories
 """
 
 import ast
-import json
 import os
 import re
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 RECEIVER_WORD = 's' + 'elf'
 GET_CALL = 'g' + 'et('
@@ -40,9 +40,20 @@ RETIRED_NAMES = ['arth' + 'kram']
 META_BUILTINS = ['exec', 'eval', 'setattr', 'getattr', 'delattr',
                  '__import__', 'globals', 'locals', 'vars']
 
+CREDENTIAL_PATTERNS = [
+    re.compile(r'\b' + 's' + r'k-[A-Za-z0-9_-]{20,}'),        # OpenAI, Anthropic, OpenRouter
+    re.compile(r'\b' + 'AI' + r'za[0-9A-Za-z_-]{30,}'),       # Google
+    re.compile(r'\b' + 'gs' + r'k_[A-Za-z0-9]{20,}'),         # Groq
+    re.compile(r'\b' + 'xa' + r'i-[A-Za-z0-9]{20,}'),         # xAI
+    re.compile(r'\b' + 'gh' + r'[pousr]_[A-Za-z0-9]{30,}'),   # GitHub
+    re.compile(r'\b' + 'AK' + r'IA[0-9A-Z]{16}\b'),           # AWS access key id
+    re.compile('AI_API' + r'_KEY\s*=\s*["\']?[A-Za-z0-9_-]{8,}'),  # an assigned key value
+]
+
 WEB_EXTENSIONS = ['.html', '.htm', '.css', '.svg', '.js']
-SKIP_DIRS = ['.git', '__pycache__', '.venv', 'venv', 'node_modules', 'runs',
+SKIP_DIRS = ['.git', '__pycache__', '.venv', 'venv', 'node_modules', 'runs', 'workspace',
              '.pytest_cache', 'build', 'dist', '.mypy_cache', '.ruff_cache']
+LOCAL_ONLY_FILES = ['.env']   # git-ignored; may legitimately hold a developer's key
 
 
 def make_violation(path, line, rule, message):
@@ -54,7 +65,8 @@ def list_repo_files(root):
     for current, dirs, files in os.walk(root):
         dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS)
         for name in sorted(files):
-            found.append(os.path.join(current, name))
+            if name not in LOCAL_ONLY_FILES:
+                found.append(os.path.join(current, name))
     return found
 
 
@@ -108,6 +120,12 @@ def scan_lines(rel_path, text):
                 violations.append(make_violation(
                     rel_path, number, 'R9',
                     'retired project name found; use OLIVER'))
+        for pattern in CREDENTIAL_PATTERNS:
+            if pattern.search(line):
+                violations.append(make_violation(
+                    rel_path, number, 'R10',
+                    'hard-coded credential found; read it from the AI_API_KEY environment variable'))
+                break
     return violations
 
 
@@ -158,58 +176,18 @@ def format_violation(violation):
         violation['message'])
 
 
-def is_inside_repo(path):
-    real_root = os.path.realpath(ROOT)
-    real_path = os.path.realpath(path)
-    if real_path == real_root:
-        return False
-    return real_path.startswith(real_root + os.sep)
-
-
-def is_skipped(path):
-    parts = os.path.relpath(os.path.realpath(path),
-                            os.path.realpath(ROOT)).split(os.sep)
-    for part in parts:
-        if part in SKIP_DIRS:
-            return True
-    return False
-
-
-def hook_file_path(payload):
-    if not isinstance(payload, dict) or 'tool_input' not in payload:
-        return ''
-    tool_input = payload['tool_input']
-    if not isinstance(tool_input, dict):
-        return ''
-    for key in ['file_path', 'notebook_path']:
-        if key in tool_input and isinstance(tool_input[key], str):
-            return tool_input[key]
-    return ''
-
-
-def run_hook():
-    try:
-        payload = json.loads(sys.stdin.read() or '{}')
-    except ValueError:
-        return 0
-    path = hook_file_path(payload)
-    if not path or not os.path.isfile(path):
-        return 0
-    if not is_inside_repo(path) or is_skipped(path):
-        return 0
-    violations = scan_file(path)
-    if not violations:
-        return 0
-    sys.stderr.write('OLIVER constraint check failed for '
-                     + os.path.relpath(path, ROOT) + ':\n')
-    for violation in violations:
-        sys.stderr.write('  ' + format_violation(violation) + '\n')
-    sys.stderr.write('Fix these before continuing (see CLAUDE.md).\n')
-    return 2
+def expand_targets(paths):
+    targets = []
+    for path in paths:
+        if os.path.isdir(path):
+            targets.extend(list_repo_files(os.path.abspath(path)))
+        else:
+            targets.append(path)
+    return targets
 
 
 def run_scan(paths):
-    targets = paths if paths else list_repo_files(ROOT)
+    targets = expand_targets(paths) if paths else list_repo_files(ROOT)
     violations = []
     for path in targets:
         if os.path.isfile(path):
@@ -226,8 +204,6 @@ def run_scan(paths):
 
 
 def main(argv):
-    if '--hook' in argv:
-        return run_hook()
     return run_scan([arg for arg in argv if not arg.startswith('--')])
 
 

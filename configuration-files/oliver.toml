@@ -1,0 +1,86 @@
+# OLIVER configuration: the model and every setting that shapes a run.
+# `make run` and `make test REAL=1` read this file. Nothing in it is secret.
+#
+# The API credential is never stored in this repository. OLIVER reads it at
+# run time from the AI_API_KEY environment variable:
+#     export AI_API_KEY="<PROVIDED_API_KEY>"
+#
+# Optional environment overrides, so no file has to be edited:
+#     OLIVER_MODEL      replaces `model`
+#     OLIVER_API_BASE   replaces `api_base`
+#     OLIVER_CONFIG     path of a different configuration file
+
+# ------------------------------------------------------------------ model --
+
+# LiteLLM model id, written "provider/model". Set it to the model prescribed
+# for the official evaluation, for example:
+#     model = "anthropic/claude-sonnet-5"
+#     model = "openai/gpt-4.1"
+#     model = "gemini/gemini-2.5-flash"
+# "auto" uses the [auto_models] entry for the provider that issued AI_API_KEY,
+# recognised from the key prefix. The model in use is printed at start-up.
+model = "auto"
+
+# OpenAI-compatible endpoint of a gateway or proxy. Empty: the provider's own API.
+api_base = ""
+
+# "auto": native tool calling when LiteLLM reports support for the model,
+# otherwise the tools are described in the prompt. Force with "native" or "text".
+tool_mode = "auto"
+
+# -------------------------------------------------------- reproducibility --
+
+temperature = 0.0          # greedy decoding
+seed = 42                  # sent to providers that support seeded sampling; -1 sends none
+max_output_tokens = 8192   # per model reply
+request_timeout = 300      # seconds per model call
+max_retries = 4            # retries on rate limits and transient API errors
+retry_base_seconds = 1.0   # exponential backoff base
+
+# ----------------------------------------------------------------- limits --
+# A task stops at the first limit reached and keeps its best verified patch.
+
+max_steps = 60             # model turns
+max_total_tokens = 2000000
+max_wall_seconds = 1800    # 30 minutes
+context_tokens = 120000    # conversation size limit, capped at 80% of the model's window
+
+# ----------------------------------------------------------------- phases --
+
+plan_steps = 10            # read-only turns before a plan is required
+execute_steps = 30         # model turns per execute phase
+max_recovery_attempts = 3  # verify, recover, execute cycles after a failed verification
+max_replans = 1            # roll back and plan again when the same failure repeats
+loop_threshold = 3         # identical tool calls in a row that count as a loop
+review = true              # the model reviews the verified patch before finishing
+max_review_rounds = 1
+
+# ----------------------------------------------------------- verification --
+
+test_command = ""          # empty: detected (pytest, npm test, go test, cargo test, make test)
+run_baseline = true        # run the tests before any edit to separate fixed from pre-existing failures
+test_timeout = 600         # seconds per test run
+command_timeout = 120      # seconds per shell command issued by the model
+sandbox = "local"          # "local", or "docker" (network off, 2 GB memory, 2 CPUs)
+docker_image = "python:3.11-slim"
+
+# ---------------------------------------------------------------- context --
+
+compress_ratio = 0.75         # compress the conversation above this share of the context limit
+keep_recent_messages = 12     # newest messages kept verbatim when compressing
+read_window = 400             # lines returned per read_file call
+max_tool_output_chars = 12000 # tool output kept per call (head and tail)
+repo_map_chars = 8000         # size of the ranked repository map in the system prompt
+
+# ------------------------------------------------------------- auto model --
+# Only used when model = "auto": the provider is recognised from the
+# AI_API_KEY prefix and the model listed for it here is used.
+
+[auto_models]
+anthropic = "anthropic/claude-sonnet-5"
+openai = "openai/gpt-4.1"
+gemini = "gemini/gemini-2.5-flash"
+groq = "groq/openai/gpt-oss-120b"
+openrouter = "openrouter/anthropic/claude-sonnet-4.5"
+xai = "xai/grok-code-fast-1"
+cerebras = "cerebras/gpt-oss-120b"
