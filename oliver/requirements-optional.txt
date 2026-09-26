@@ -1,0 +1,2 @@
+# Optional: embedding-based repository search (OLIVER_SEMANTIC_SEARCH=1)
+chromadb>=0.5
