@@ -208,8 +208,18 @@ def run_hook():
     return 2
 
 
+def expand_targets(paths):
+    targets = []
+    for path in paths:
+        if os.path.isdir(path):
+            targets.extend(list_repo_files(os.path.abspath(path)))
+        else:
+            targets.append(path)
+    return targets
+
+
 def run_scan(paths):
-    targets = paths if paths else list_repo_files(ROOT)
+    targets = expand_targets(paths) if paths else list_repo_files(ROOT)
     violations = []
     for path in targets:
         if os.path.isfile(path):
