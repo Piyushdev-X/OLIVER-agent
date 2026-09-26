@@ -1,0 +1,646 @@
+{
+  "source": "offline eval, scripted mock trajectories (harness mechanics, not model quality)",
+  "runs": [
+    {
+      "task": "config_merge",
+      "title": "merge_config drops nested settings",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 6,
+      "model_calls": 7,
+      "attempts": 0,
+      "replans": 0,
+      "seconds": 1.62,
+      "tokens": 7990,
+      "by_phase": {
+        "plan": {
+          "calls": 2,
+          "tokens": 1694
+        },
+        "execute": {
+          "calls": 4,
+          "tokens": 5779
+        },
+        "review": {
+          "calls": 1,
+          "tokens": 517
+        }
+      },
+      "files_indexed": 3,
+      "task_chars": 277,
+      "test_command": "python3 -m pytest",
+      "memory": [
+        {
+          "kind": "fact",
+          "text": "Test command: python3 -m pytest. Baseline: 1 passed, 0 failed, 0 errors, 0 skipped",
+          "step": 0,
+          "phase": "INIT",
+          "recalled": []
+        },
+        {
+          "kind": "decision",
+          "text": "Plan: merge_config() replaces nested dicts instead of merging them recursively",
+          "step": 2,
+          "phase": "PLAN",
+          "recalled": []
+        },
+        {
+          "kind": "fact",
+          "text": "Verification passed at step 6",
+          "step": 6,
+          "phase": "REVIEW",
+          "recalled": []
+        }
+      ],
+      "recalls": [],
+      "recall_text": "- [fact] Test command: python3 -m pytest. Baseline: 1 passed, 0 failed, 0 errors, 0 skipped\n- [decision] Plan: merge_config() replaces nested dicts instead of merging them recursively\n- [fact] Verification passed at step 6",
+      "tools": {
+        "read_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "write_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "edit_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "run_tests": {
+          "calls": 1,
+          "errors": 0
+        },
+        "finish": {
+          "calls": 1,
+          "errors": 0
+        }
+      },
+      "checks": [
+        {
+          "name": "changes",
+          "ok": true,
+          "detail": "config.py, tests/test_nested_merge.py"
+        },
+        {
+          "name": "syntax",
+          "ok": true,
+          "detail": "all changed files parse"
+        },
+        {
+          "name": "reproduction",
+          "ok": true,
+          "detail": "exit code 0"
+        },
+        {
+          "name": "tests",
+          "ok": true,
+          "detail": "2 passed, 0 failed, 0 errors, 0 skipped"
+        }
+      ],
+      "patch": {
+        "files": 2,
+        "added": 10,
+        "removed": 1
+      },
+      "root_cause": "merge_config() replaces nested dicts instead of merging them recursively"
+    },
+    {
+      "task": "inventory_total",
+      "title": "order_total ignores quantities",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 10,
+      "model_calls": 11,
+      "attempts": 1,
+      "replans": 0,
+      "seconds": 1.93,
+      "tokens": 16106,
+      "by_phase": {
+        "plan": {
+          "calls": 3,
+          "tokens": 2660
+        },
+        "execute": {
+          "calls": 7,
+          "tokens": 13023
+        },
+        "review": {
+          "calls": 1,
+          "tokens": 423
+        }
+      },
+      "files_indexed": 3,
+      "task_chars": 177,
+      "test_command": "python3 -m pytest",
+      "memory": [
+        {
+          "kind": "fact",
+          "text": "Test command: python3 -m pytest. Baseline: 2 passed, 0 failed, 0 errors, 0 skipped",
+          "step": 0,
+          "phase": "INIT",
+          "recalled": [
+            "RECOVER \u00b7 step 6"
+          ]
+        },
+        {
+          "kind": "decision",
+          "text": "Plan: order_total() adds each price once and ignores the quantity",
+          "step": 3,
+          "phase": "PLAN",
+          "recalled": [
+            "RECOVER \u00b7 step 6"
+          ]
+        },
+        {
+          "kind": "failure",
+          "text": "Attempt 1: the change broke tests that passed before. broken (passed before, fail now): tests/test_inventory.py::test_single_items",
+          "step": 6,
+          "phase": "RECOVER",
+          "recalled": [
+            "RECOVER \u00b7 step 6"
+          ]
+        },
+        {
+          "kind": "fact",
+          "text": "Verification passed at step 10",
+          "step": 10,
+          "phase": "REVIEW",
+          "recalled": []
+        }
+      ],
+      "recalls": [
+        {
+          "step": 6,
+          "phase": "RECOVER",
+          "kind": "recover"
+        }
+      ],
+      "recall_text": "- [fact] Test command: python3 -m pytest. Baseline: 2 passed, 0 failed, 0 errors, 0 skipped\n- [decision] Plan: order_total() adds each price once and ignores the quantity\n- [failure] Attempt 1: the change broke tests that passed before. broken (passed before, fail now): tests/test_inventory.py::test_single_items\n- [fact] Verification passed at step 10",
+      "tools": {
+        "search_repo": {
+          "calls": 1,
+          "errors": 0
+        },
+        "read_file": {
+          "calls": 2,
+          "errors": 0
+        },
+        "write_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "edit_file": {
+          "calls": 2,
+          "errors": 0
+        },
+        "finish": {
+          "calls": 2,
+          "errors": 0
+        },
+        "run_tests": {
+          "calls": 1,
+          "errors": 0
+        }
+      },
+      "checks": [
+        {
+          "name": "changes",
+          "ok": true,
+          "detail": "inventory.py, tests/test_order_quantities.py"
+        },
+        {
+          "name": "syntax",
+          "ok": true,
+          "detail": "all changed files parse"
+        },
+        {
+          "name": "reproduction",
+          "ok": true,
+          "detail": "exit code 0"
+        },
+        {
+          "name": "tests",
+          "ok": true,
+          "detail": "3 passed, 0 failed, 0 errors, 0 skipped"
+        }
+      ],
+      "patch": {
+        "files": 2,
+        "added": 6,
+        "removed": 1
+      },
+      "root_cause": "order_total() adds each price once and ignores the quantity"
+    },
+    {
+      "task": "leap_year",
+      "title": "1900 is reported as a leap year",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 6,
+      "model_calls": 7,
+      "attempts": 0,
+      "replans": 0,
+      "seconds": 1.27,
+      "tokens": 7302,
+      "by_phase": {
+        "plan": {
+          "calls": 2,
+          "tokens": 1623
+        },
+        "execute": {
+          "calls": 4,
+          "tokens": 5266
+        },
+        "review": {
+          "calls": 1,
+          "tokens": 413
+        }
+      },
+      "files_indexed": 3,
+      "task_chars": 195,
+      "test_command": "python3 -m pytest",
+      "memory": [
+        {
+          "kind": "fact",
+          "text": "Test command: python3 -m pytest. Baseline: 2 passed, 0 failed, 0 errors, 0 skipped",
+          "step": 0,
+          "phase": "INIT",
+          "recalled": []
+        },
+        {
+          "kind": "decision",
+          "text": "Plan: is_leap_year() only checks divisibility by 4 and misses the century rule",
+          "step": 2,
+          "phase": "PLAN",
+          "recalled": []
+        },
+        {
+          "kind": "fact",
+          "text": "Verification passed at step 6",
+          "step": 6,
+          "phase": "REVIEW",
+          "recalled": []
+        }
+      ],
+      "recalls": [],
+      "recall_text": "- [fact] Test command: python3 -m pytest. Baseline: 2 passed, 0 failed, 0 errors, 0 skipped\n- [decision] Plan: is_leap_year() only checks divisibility by 4 and misses the century rule\n- [fact] Verification passed at step 6",
+      "tools": {
+        "read_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "write_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "edit_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "run_tests": {
+          "calls": 1,
+          "errors": 0
+        },
+        "finish": {
+          "calls": 1,
+          "errors": 0
+        }
+      },
+      "checks": [
+        {
+          "name": "changes",
+          "ok": true,
+          "detail": "calendar_utils.py, tests/test_century_years.py"
+        },
+        {
+          "name": "syntax",
+          "ok": true,
+          "detail": "all changed files parse"
+        },
+        {
+          "name": "reproduction",
+          "ok": true,
+          "detail": "exit code 0"
+        },
+        {
+          "name": "tests",
+          "ok": true,
+          "detail": "3 passed, 0 failed, 0 errors, 0 skipped"
+        }
+      ],
+      "patch": {
+        "files": 2,
+        "added": 7,
+        "removed": 1
+      },
+      "root_cause": "is_leap_year() only checks divisibility by 4 and misses the century rule"
+    },
+    {
+      "task": "stats_average",
+      "title": "average() returns the wrong value",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 8,
+      "model_calls": 9,
+      "attempts": 0,
+      "replans": 0,
+      "seconds": 1.5,
+      "tokens": 10651,
+      "by_phase": {
+        "plan": {
+          "calls": 3,
+          "tokens": 2564
+        },
+        "execute": {
+          "calls": 5,
+          "tokens": 7683
+        },
+        "review": {
+          "calls": 1,
+          "tokens": 404
+        }
+      },
+      "files_indexed": 3,
+      "task_chars": 205,
+      "test_command": "python3 -m pytest",
+      "memory": [
+        {
+          "kind": "fact",
+          "text": "Test command: python3 -m pytest. Baseline: 2 passed, 0 failed, 0 errors, 0 skipped",
+          "step": 0,
+          "phase": "INIT",
+          "recalled": []
+        },
+        {
+          "kind": "decision",
+          "text": "Plan: average() divides by len(values) + 1 instead of len(values)",
+          "step": 3,
+          "phase": "PLAN",
+          "recalled": []
+        },
+        {
+          "kind": "fact",
+          "text": "Verification passed at step 8",
+          "step": 8,
+          "phase": "REVIEW",
+          "recalled": []
+        }
+      ],
+      "recalls": [],
+      "recall_text": "- [fact] Test command: python3 -m pytest. Baseline: 2 passed, 0 failed, 0 errors, 0 skipped\n- [decision] Plan: average() divides by len(values) + 1 instead of len(values)\n- [fact] Verification passed at step 8",
+      "tools": {
+        "search_repo": {
+          "calls": 1,
+          "errors": 0
+        },
+        "read_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "write_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "run_tests": {
+          "calls": 2,
+          "errors": 0
+        },
+        "edit_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "finish": {
+          "calls": 1,
+          "errors": 0
+        }
+      },
+      "checks": [
+        {
+          "name": "changes",
+          "ok": true,
+          "detail": "stats.py, tests/test_average_regression.py"
+        },
+        {
+          "name": "syntax",
+          "ok": true,
+          "detail": "all changed files parse"
+        },
+        {
+          "name": "reproduction",
+          "ok": true,
+          "detail": "exit code 0"
+        },
+        {
+          "name": "tests",
+          "ok": true,
+          "detail": "3 passed, 0 failed, 0 errors, 0 skipped"
+        }
+      ],
+      "patch": {
+        "files": 2,
+        "added": 6,
+        "removed": 1
+      },
+      "root_cause": "average() divides by len(values) + 1 instead of len(values)"
+    },
+    {
+      "task": "text_slugify",
+      "title": "slugify() produces broken slugs",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 8,
+      "model_calls": 9,
+      "attempts": 0,
+      "replans": 0,
+      "seconds": 0.98,
+      "tokens": 10692,
+      "by_phase": {
+        "plan": {
+          "calls": 2,
+          "tokens": 1607
+        },
+        "execute": {
+          "calls": 6,
+          "tokens": 8655
+        },
+        "review": {
+          "calls": 1,
+          "tokens": 430
+        }
+      },
+      "files_indexed": 3,
+      "task_chars": 271,
+      "test_command": "python3 -m pytest",
+      "memory": [
+        {
+          "kind": "fact",
+          "text": "Test command: python3 -m pytest. Baseline: 1 passed, 0 failed, 0 errors, 0 skipped",
+          "step": 0,
+          "phase": "INIT",
+          "recalled": []
+        },
+        {
+          "kind": "decision",
+          "text": "Plan: slugify() only splits on single spaces and never lowercases or strips punctuation",
+          "step": 2,
+          "phase": "PLAN",
+          "recalled": []
+        },
+        {
+          "kind": "fact",
+          "text": "Verification passed at step 8",
+          "step": 8,
+          "phase": "REVIEW",
+          "recalled": []
+        }
+      ],
+      "recalls": [],
+      "recall_text": "- [fact] Test command: python3 -m pytest. Baseline: 1 passed, 0 failed, 0 errors, 0 skipped\n- [decision] Plan: slugify() only splits on single spaces and never lowercases or strips punctuation\n- [fact] Verification passed at step 8",
+      "tools": {
+        "read_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "edit_file": {
+          "calls": 3,
+          "errors": 1
+        },
+        "write_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "run_tests": {
+          "calls": 1,
+          "errors": 0
+        },
+        "finish": {
+          "calls": 1,
+          "errors": 0
+        }
+      },
+      "checks": [
+        {
+          "name": "changes",
+          "ok": true,
+          "detail": "tests/test_slugify_punctuation.py, text_utils.py"
+        },
+        {
+          "name": "syntax",
+          "ok": true,
+          "detail": "all changed files parse"
+        },
+        {
+          "name": "tests",
+          "ok": true,
+          "detail": "2 passed, 0 failed, 0 errors, 0 skipped"
+        }
+      ],
+      "patch": {
+        "files": 2,
+        "added": 8,
+        "removed": 1
+      },
+      "root_cause": "slugify() only splits on single spaces and never lowercases or strips punctuation"
+    },
+    {
+      "task": "word_count",
+      "title": "word_count miscounts extra whitespace",
+      "status": "resolved",
+      "resolved": true,
+      "steps": 6,
+      "model_calls": 7,
+      "attempts": 0,
+      "replans": 0,
+      "seconds": 1.03,
+      "tokens": 6832,
+      "by_phase": {
+        "plan": {
+          "calls": 2,
+          "tokens": 1551
+        },
+        "execute": {
+          "calls": 4,
+          "tokens": 4871
+        },
+        "review": {
+          "calls": 1,
+          "tokens": 410
+        }
+      },
+      "files_indexed": 3,
+      "task_chars": 216,
+      "test_command": "python3 -m pytest",
+      "memory": [
+        {
+          "kind": "fact",
+          "text": "Test command: python3 -m pytest. Baseline: 2 passed, 0 failed, 0 errors, 0 skipped",
+          "step": 0,
+          "phase": "INIT",
+          "recalled": []
+        },
+        {
+          "kind": "decision",
+          "text": "Plan: word_count() splits on a single space, so runs of whitespace create empty words",
+          "step": 2,
+          "phase": "PLAN",
+          "recalled": []
+        },
+        {
+          "kind": "fact",
+          "text": "Verification passed at step 6",
+          "step": 6,
+          "phase": "REVIEW",
+          "recalled": []
+        }
+      ],
+      "recalls": [],
+      "recall_text": "- [fact] Test command: python3 -m pytest. Baseline: 2 passed, 0 failed, 0 errors, 0 skipped\n- [decision] Plan: word_count() splits on a single space, so runs of whitespace create empty words\n- [fact] Verification passed at step 6",
+      "tools": {
+        "search_repo": {
+          "calls": 1,
+          "errors": 0
+        },
+        "edit_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "write_file": {
+          "calls": 1,
+          "errors": 0
+        },
+        "run_tests": {
+          "calls": 1,
+          "errors": 0
+        },
+        "finish": {
+          "calls": 1,
+          "errors": 0
+        }
+      },
+      "checks": [
+        {
+          "name": "changes",
+          "ok": true,
+          "detail": "tests/test_word_count_whitespace.py, text_stats.py"
+        },
+        {
+          "name": "syntax",
+          "ok": true,
+          "detail": "all changed files parse"
+        },
+        {
+          "name": "tests",
+          "ok": true,
+          "detail": "3 passed, 0 failed, 0 errors, 0 skipped"
+        }
+      ],
+      "patch": {
+        "files": 2,
+        "added": 7,
+        "removed": 3
+      },
+      "root_cause": "word_count() splits on a single space, so runs of whitespace create empty words"
+    }
+  ]
+}

@@ -1,0 +1,980 @@
+/* ==========================================================================
+   OLIVER website - stylesheet
+   Morning palette (crisp white, deep black, one clear blue accent), stark
+   minimalist hierarchy, document-style prose and spreadsheet-style grids.
+   Rules: every value is hardcoded (no custom properties), no media-query
+   rules, one rigid 960px desktop layout, no chronological track components.
+     paper  #FFFFFF   wash  #F6F6F3   ink   #0B0B0C   soft  #6B6A63
+     line   #E4E3DC   grid  #D4D3CC   blue  #0066CC   sun   #E8590C
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #F6F6F3;
+}
+
+body {
+  margin: 0;
+  min-width: 960px;
+  background: #F6F6F3;
+  color: #0B0B0C;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 24px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  width: 960px;
+  margin: 0 auto;
+}
+
+a {
+  color: #0066CC;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #004FA3;
+  text-decoration: underline;
+}
+
+:focus-visible {
+  outline: 2px solid #0066CC;
+  outline-offset: 2px;
+}
+
+code,
+kbd,
+pre {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+code {
+  font-size: 13px;
+  background: #F0F0EC;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+/* --- keycaps: the signature element ------------------------------------ */
+
+kbd {
+  display: inline-block;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid #C9C8C1;
+  border-bottom: 2px solid #B4B3A8;
+  border-radius: 5px;
+  background: #FFFFFF;
+  color: #0B0B0C;
+  font-size: 12px;
+  line-height: 19px;
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
+}
+
+kbd.small {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  line-height: 13px;
+  border-bottom-width: 1px;
+  color: #6B6A63;
+}
+
+/* --- top bar -------------------------------------------------------------- */
+
+.topbar {
+  background: #FFFFFF;
+  border-bottom: 1px solid #E4E3DC;
+}
+
+.topbar .page {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 140px;
+  color: #0B0B0C;
+  font-size: 17px;
+  line-height: 20px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.brand:hover {
+  color: #0B0B0C;
+  text-decoration: none;
+}
+
+.sun {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #E8590C;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  width: 560px;
+}
+
+.nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 56px;
+  color: #3F3F3C;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 2px solid #FFFFFF;
+}
+
+.nav a:hover {
+  color: #0B0B0C;
+  text-decoration: none;
+}
+
+.nav a.is-current {
+  color: #0B0B0C;
+  font-weight: 600;
+  border-bottom: 2px solid #0B0B0C;
+}
+
+.palette-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 220px;
+  height: 34px;
+  padding: 0 6px 0 12px;
+  border: 1px solid #D4D3CC;
+  border-radius: 8px;
+  background: #F6F6F3;
+  color: #6B6A63;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.palette-trigger:hover {
+  border-color: #B4B3A8;
+  color: #0B0B0C;
+}
+
+.palette-trigger .keys {
+  display: flex;
+  gap: 4px;
+}
+
+/* --- masthead with dedicated logo space ------------------------------------ */
+
+.masthead {
+  background: #FFFFFF;
+  border-bottom: 1px solid #E4E3DC;
+}
+
+.masthead .page {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 40px 0 32px 0;
+}
+
+.masthead-text {
+  width: 620px;
+}
+
+.eyebrow {
+  margin: 0 0 8px 0;
+  color: #6B6A63;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: 40px;
+  line-height: 46px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.display {
+  font-size: 64px;
+  line-height: 68px;
+  letter-spacing: -2px;
+}
+
+.lede {
+  margin: 12px 0 0 0;
+  color: #3F3F3C;
+  font-size: 17px;
+  line-height: 27px;
+}
+
+.logo-rail {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 176px;
+  height: 56px;
+  border: 1px dashed #B4B3A8;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #6B6A63;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.logo-slot.mark {
+  width: 56px;
+}
+
+.logo-slot.small {
+  width: 120px;
+  height: 40px;
+}
+
+.logo-slot.small.mark {
+  width: 40px;
+}
+
+.logo-slot img {
+  display: block;
+  max-width: 152px;
+  max-height: 40px;
+}
+
+/* --- main content ------------------------------------------------------------ */
+
+.content {
+  padding: 40px 0 64px 0;
+}
+
+.section-title {
+  margin: 48px 0 16px 0;
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.section-title:first-child {
+  margin-top: 0;
+}
+
+.section-note {
+  margin: -8px 0 16px 0;
+  color: #6B6A63;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.tile {
+  width: 228px;
+  padding: 18px 20px;
+  border: 1px solid #E4E3DC;
+  border-radius: 12px;
+  background: #FFFFFF;
+}
+
+.tile-label {
+  margin: 0 0 6px 0;
+  color: #6B6A63;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.tile-value {
+  margin: 0;
+  font-size: 32px;
+  line-height: 38px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.tile-sub {
+  margin: 6px 0 0 0;
+  color: #6B6A63;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.card {
+  padding: 20px 22px;
+  border: 1px solid #E4E3DC;
+  border-radius: 12px;
+  background: #FFFFFF;
+}
+
+.card h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.card p {
+  margin: 0;
+  color: #3F3F3C;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.card .meta {
+  margin: 0 0 10px 0;
+  color: #6B6A63;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 309px 309px 310px;
+  column-gap: 16px;
+  row-gap: 16px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 472px 472px;
+  column-gap: 16px;
+  row-gap: 16px;
+}
+
+/* --- document sheets (word-processor style) --------------------------------- */
+
+.doc {
+  width: 960px;
+  padding: 56px 72px 40px 72px;
+  border: 1px solid #D4D3CC;
+  background: #FFFFFF;
+}
+
+.doc-running {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 40px 0;
+  padding: 0 0 10px 0;
+  border-bottom: 1px solid #E4E3DC;
+  color: #6B6A63;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.doc h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 44px 0 12px 0;
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.doc h2 .num {
+  width: 32px;
+  color: #6B6A63;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.doc h3 {
+  margin: 24px 0 8px 46px;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.doc p,
+.doc ol,
+.doc ul {
+  width: 640px;
+  margin: 0 0 14px 46px;
+  font-family: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+  font-size: 16px;
+  line-height: 27px;
+  color: #1C1C1D;
+}
+
+.doc ol,
+.doc ul {
+  padding: 0 0 0 22px;
+}
+
+.doc li {
+  margin: 0 0 6px 0;
+}
+
+.doc .fig,
+.doc .xl-wrap,
+.doc .black-panel {
+  margin: 20px 0 8px 0;
+}
+
+.doc-folio {
+  display: flex;
+  justify-content: space-between;
+  margin: 48px 0 0 0;
+  padding: 10px 0 0 0;
+  border-top: 1px solid #E4E3DC;
+  color: #6B6A63;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.toc {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc li {
+  margin: 0;
+}
+
+.toc a {
+  display: flex;
+  align-items: baseline;
+  padding: 7px 0;
+  color: #0B0B0C;
+  font-size: 15px;
+}
+
+.toc a:hover {
+  color: #0066CC;
+  text-decoration: none;
+}
+
+.toc .num {
+  width: 36px;
+  color: #6B6A63;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.toc .leader {
+  flex: 1;
+  margin: 0 10px;
+  border-bottom: 1px dotted #B4B3A8;
+}
+
+.toc .where {
+  color: #6B6A63;
+  font-size: 13px;
+}
+
+/* --- figures and diagrams ------------------------------------------------------ */
+
+.fig {
+  width: 814px;
+  border: 1px solid #D4D3CC;
+  border-radius: 12px;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.fig svg {
+  display: block;
+}
+
+.fig-caption {
+  margin: 8px 0 20px 0;
+  color: #6B6A63;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.dg text {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.dg .t {
+  font-size: 14px;
+  font-weight: 600;
+  fill: #0B0B0C;
+}
+
+.dg .t-inv {
+  font-size: 14px;
+  font-weight: 600;
+  fill: #FFFFFF;
+}
+
+.dg .s {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  fill: #6B6A63;
+}
+
+.dg .s-inv {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  fill: #D4D3CC;
+}
+
+.dg .n {
+  font-size: 12px;
+  fill: #3F3F3C;
+}
+
+.dg .e {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  fill: #3F3F3C;
+}
+
+.dg .lg {
+  font-size: 12px;
+  fill: #0B0B0C;
+}
+
+.dg .slot {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  fill: #6B6A63;
+}
+
+/* --- spreadsheet grids ---------------------------------------------------------- */
+
+.xl-wrap {
+  border: 1px solid #D4D3CC;
+  border-radius: 8px;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.xl-formula {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  border-bottom: 1px solid #D4D3CC;
+  background: #FFFFFF;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.xl-name {
+  width: 72px;
+  height: 36px;
+  padding: 0 10px;
+  border-right: 1px solid #D4D3CC;
+  line-height: 36px;
+  color: #3F3F3C;
+}
+
+.xl-fx {
+  width: 36px;
+  color: #6B6A63;
+  font-style: italic;
+  text-align: center;
+}
+
+.xl-expr {
+  color: #0B0B0C;
+}
+
+.xl-scroll {
+  overflow-x: auto;
+}
+
+.xl {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.xl th,
+.xl td {
+  height: 30px;
+  padding: 5px 8px;
+  border: 1px solid #D4D3CC;
+  white-space: nowrap;
+}
+
+.xl thead th {
+  background: #F0F0EC;
+  color: #6B6A63;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.xl .rn {
+  width: 36px;
+  background: #F0F0EC;
+  color: #6B6A63;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.xl .hd td {
+  background: #F6F6F3;
+  font-weight: 700;
+  color: #0B0B0C;
+}
+
+.xl .n {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.xl .id {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.xl .in {
+  color: #0055B8;
+}
+
+.xl .total td {
+  border-top: 3px double #0B0B0C;
+  font-weight: 700;
+}
+
+.xl .is-active {
+  outline: 2px solid #0066CC;
+  outline-offset: -2px;
+}
+
+.xl .wrap {
+  white-space: normal;
+}
+
+.xl-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 0 0 36px;
+  border-top: 1px solid #D4D3CC;
+  background: #F0F0EC;
+}
+
+.xl-tab {
+  padding: 6px 16px;
+  border: 1px solid #F0F0EC;
+  border-top: 0;
+  color: #3F3F3C;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.xl-tab:hover {
+  color: #0B0B0C;
+  text-decoration: none;
+}
+
+.xl-tab.is-current {
+  background: #FFFFFF;
+  border-color: #D4D3CC;
+  border-bottom: 2px solid #0B0B0C;
+  color: #0B0B0C;
+  font-weight: 700;
+}
+
+.xl-legend {
+  display: flex;
+  gap: 20px;
+  margin: 10px 0 0 0;
+  color: #6B6A63;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.swatch-in {
+  color: #0055B8;
+  font-weight: 700;
+}
+
+.swatch-fx {
+  color: #0B0B0C;
+  font-weight: 700;
+}
+
+.databar {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 8px 0 0;
+}
+
+.databar rect {
+  fill: #0066CC;
+}
+
+.databar .track {
+  fill: #EFEFEA;
+}
+
+/* --- status chips ----------------------------------------------------------- */
+
+.st {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.st-pass {
+  background: #E7F4EC;
+  color: #0B7A3E;
+}
+
+.st-fail {
+  background: #FDECEA;
+  color: #B42318;
+}
+
+.st-warn {
+  background: #FFF4D6;
+  color: #8A5A00;
+}
+
+.st-none {
+  background: #F0F0EC;
+  color: #3F3F3C;
+}
+
+/* --- memory views ------------------------------------------------------------ */
+
+.kind {
+  display: inline-block;
+  width: 78px;
+  padding: 1px 0;
+  border: 1px solid #D4D3CC;
+  border-radius: 4px;
+  background: #FFFFFF;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 700;
+  text-align: center;
+  color: #0B0B0C;
+}
+
+.kind-failure {
+  border-color: #B42318;
+  color: #B42318;
+}
+
+.kind-decision {
+  border-color: #0066CC;
+  color: #0066CC;
+}
+
+.tree {
+  margin: 0;
+  padding: 18px 20px;
+  border: 1px solid #E4E3DC;
+  border-radius: 12px;
+  background: #FFFFFF;
+  font-size: 13px;
+  line-height: 24px;
+  white-space: pre;
+}
+
+.black-panel {
+  margin: 0;
+  padding: 20px 22px;
+  border-radius: 12px;
+  background: #0B0B0C;
+  color: #F6F6F3;
+  font-size: 13px;
+  line-height: 21px;
+  white-space: pre-wrap;
+}
+
+.black-panel .dim {
+  color: #B4B3A8;
+}
+
+/* --- footer ----------------------------------------------------------------- */
+
+.footer {
+  background: #FFFFFF;
+  border-top: 1px solid #E4E3DC;
+}
+
+.footer .page {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 0;
+}
+
+.footer-text {
+  width: 560px;
+  color: #6B6A63;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.footer-text p {
+  margin: 0 0 4px 0;
+}
+
+.footer-text strong {
+  color: #0B0B0C;
+}
+
+/* --- command palette and shortcut sheet ------------------------------------------ */
+
+dialog {
+  width: 560px;
+  padding: 0;
+  border: 1px solid #D4D3CC;
+  border-radius: 14px;
+  background: #FFFFFF;
+  color: #0B0B0C;
+  box-shadow: 0 24px 64px rgba(11, 11, 12, 0.22);
+}
+
+dialog::backdrop {
+  background: rgba(11, 11, 12, 0.32);
+}
+
+.palette-input {
+  display: block;
+  width: 100%;
+  height: 52px;
+  padding: 0 18px;
+  border: 0;
+  border-bottom: 1px solid #E4E3DC;
+  border-radius: 14px 14px 0 0;
+  font-family: inherit;
+  font-size: 17px;
+  color: #0B0B0C;
+  outline: none;
+}
+
+.palette-list {
+  max-height: 360px;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: #0B0B0C;
+  font-size: 14px;
+}
+
+.palette-item:hover {
+  background: #F6F6F3;
+  color: #0B0B0C;
+  text-decoration: none;
+}
+
+.palette-item.is-selected {
+  background: #E8F0FB;
+  color: #0B0B0C;
+}
+
+.palette-item .where {
+  color: #6B6A63;
+  font-size: 12px;
+}
+
+.palette-foot {
+  display: flex;
+  gap: 16px;
+  padding: 10px 16px;
+  border-top: 1px solid #E4E3DC;
+  color: #6B6A63;
+  font-size: 12px;
+  line-height: 22px;
+}
+
+.sheet-title {
+  margin: 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid #E4E3DC;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 700;
+}
+
+.keys-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.keys-table td {
+  padding: 9px 20px;
+  border-bottom: 1px solid #F0F0EC;
+}
+
+.keys-table td:last-child {
+  text-align: right;
+}
+
+.chord-hint {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #0B0B0C;
+  color: #FFFFFF;
+  font-size: 13px;
+  line-height: 20px;
+}
