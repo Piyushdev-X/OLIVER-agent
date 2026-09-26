@@ -22,7 +22,12 @@ VENV_PYTHON := $(VENV)/bin/python
 SETUP_STAMP := $(VENV)/.oliver-setup-complete
 REQUIREMENTS := dependency-files/requirements.txt
 SOURCE := $(CURDIR)/source-code
-PIP_BOOTSTRAP := https://bootstrap.pypa.io/get-pip.py
+# Installs pip into a venv created without it, using only PyPI (the same index make setup needs).
+PIP_FROM_PYPI := import json, os, subprocess, sys, urllib.request; \
+    release = json.load(urllib.request.urlopen('https://pypi.org/pypi/pip/json', timeout=60)); \
+    url = [item['url'] for item in release['urls'] if item['filename'].endswith('.whl')][0]; \
+    path = os.path.join('$(VENV)', url.split('/')[-1]); urllib.request.urlretrieve(url, path); \
+    subprocess.check_call([sys.executable, os.path.join(path, 'pip'), 'install', '--quiet', path]); os.remove(path)
 VERSION_CHECK := import sys; sys.exit(not (3, 10) <= sys.version_info[:2] <= (3, 14))
 
 ifeq ($(origin PYTHON),undefined)
@@ -59,11 +64,10 @@ setup:
 		echo "  Creating the virtual environment $(VENV)/ with $(PYTHON)"; \
 		rm -rf "$(VENV)"; \
 		if ! "$(PYTHON)" -m venv "$(VENV)" >/dev/null 2>&1; then \
-			echo "  This Python has no ensurepip (python3-venv); bootstrapping pip instead"; \
+			echo "  This Python has no ensurepip (python3-venv); installing pip from PyPI instead"; \
 			rm -rf "$(VENV)"; \
 			"$(PYTHON)" -m venv --without-pip "$(VENV)" && \
-			"$(VENV_PYTHON)" -c "import urllib.request; urllib.request.urlretrieve('$(PIP_BOOTSTRAP)', '$(VENV)/bootstrap-pip.py')" && \
-			"$(VENV_PYTHON)" "$(VENV)/bootstrap-pip.py" --quiet || exit 1; \
+			"$(VENV_PYTHON)" -c "$(PIP_FROM_PYPI)" || exit 1; \
 		fi; \
 	fi
 	@echo "  Installing dependencies from $(REQUIREMENTS)"

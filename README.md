@@ -30,7 +30,7 @@ model provider. ripgrep is used when present. Docker is only needed for
 
 | Command | What it does |
 |---|---|
-| `make setup` | Creates `.venv/` with the first Python 3.10–3.14 found on `PATH` (or `PYTHON=...`), installs the pinned `dependency-files/requirements.txt`, then checks the configuration, the credential and every dependency. It is safe to run again. |
+| `make setup` | Creates `.venv/` with the first Python 3.10–3.14 found on `PATH` (or `PYTHON=...`). If that Python lacks `python3-venv`, pip is installed from PyPI instead. Then it installs the pinned `dependency-files/requirements.txt` and checks the configuration, the credential and every dependency. It is safe to run again. |
 | `make run` | Launches the harness in evaluation mode: the interactive console described below. `make run REPO=<path or git URL> ISSUE=<file or GitHub issue URL>` solves one task without prompts, exiting 0 when resolved and 1 when not. |
 | `make test` | Runs the offline test suite (scripted mock model, with the key withheld), then solves the 6 bundled tasks and scores them with hidden tests. `make test REAL=1` scores the configured model on the same tasks using `AI_API_KEY`. |
 | `make clean` | Removes the generated artefacts `.venv/`, `runs/`, `workspace/` and caches. |
