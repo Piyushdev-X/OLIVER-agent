@@ -1,0 +1,14 @@
+# OLIVER AI Coding Harness: Python dependencies, installed by `make setup`
+# into .venv/. Requires Python 3.10 to 3.14.
+#
+# Direct dependencies are pinned to the exact versions the test suite passes
+# with, so every evaluation machine runs the same harness. All of them ship
+# prebuilt wheels for Linux (glibc 2.28+, x86_64 and aarch64), macOS and Windows.
+
+litellm==1.102.1            # model access behind the "OLIVER" alias; receives AI_API_KEY
+pydantic==2.13.5            # tool-argument validation (validate_call)
+tree-sitter==0.26.0         # repository parsing for the ranked repo map
+tree-sitter-python==0.25.0  # Python grammar for tree-sitter
+pytest==9.1.1               # verification runner and `make test`
+docker==7.2.0               # only used when sandbox = "docker" in configuration-files/oliver.toml
+tomli==2.3.0 ; python_version < "3.11"   # TOML reader for Python 3.10 (3.11+ ships tomllib)
