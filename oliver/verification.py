@@ -10,6 +10,7 @@ The harness, not the model, decides whether a change is verified:
 
 import json
 import os
+import re
 import shlex
 import signal
 import subprocess
@@ -22,6 +23,27 @@ from oliver import context_manager
 SECRET_MARKERS = ['KEY', 'TOKEN', 'SECRET', 'PASSWORD', 'CREDENTIAL', 'AUTH']
 MAX_CAPTURE_CHARS = 400000
 FAILING = ['failed', 'error']
+SUITE_ID = '(test suite)'
+CANNOT_RUN_EXIT_CODES = [126, 127]
+
+BLOCKED_COMMANDS = [
+    (re.compile(r'\bgit\s+(push|commit|reset|checkout|switch|restore|rebase|merge|clean|stash|am|apply)\b'),
+     'git commands that change history or the working tree are managed by the harness'),
+    (re.compile(r'\b(curl|wget|ssh|scp|rsync|nc|ncat|telnet)\b'), 'network access is not available'),
+    (re.compile(r'\b(pip|pip3|npm|yarn|pnpm|apt|apt-get|brew|conda)\s+(install|add|i)\b'),
+     'installing packages is not allowed; work with the dependencies already installed'),
+    (re.compile(r'\bsudo\b'), 'sudo is not allowed'),
+    (re.compile(r'\b(shutdown|reboot|mkfs|dd)\b'), 'system commands are not allowed'),
+    (re.compile(r'\brm\s+-[a-zA-Z]*r[a-zA-Z]*\s+(/|~|\$HOME|\*)(\s|$)'), 'recursive deletes outside the project are not allowed'),
+    (re.compile(r':\(\)\s*\{'), 'fork bombs are not allowed'),
+]
+
+
+def blocked_reason(command):
+    for pattern, reason in BLOCKED_COMMANDS:
+        if pattern.search(command):
+            return reason
+    return ''
 
 
 # --- command execution -------------------------------------------------------
@@ -179,8 +201,9 @@ def run_tests(repo_root, test_command, targets, settings):
             os.remove(junit_path)
         except OSError:
             pass
-    if not outcomes and not is_pytest_command(test_command):
-        outcomes = {'(test suite)': 'passed' if result['exit_code'] == 0 else 'failed'}
+    ran = result['exit_code'] not in CANNOT_RUN_EXIT_CODES and not result['timed_out']
+    if not outcomes and not is_pytest_command(test_command) and ran:
+        outcomes = {SUITE_ID: 'passed' if result['exit_code'] == 0 else 'failed'}
     counts = {'passed': 0, 'failed': 0, 'error': 0, 'skipped': 0}
     for status in outcomes.values():
         counts[status] += 1
@@ -265,14 +288,20 @@ def summarize_tests(results):
 
 
 def compare_to_baseline(baseline, final):
-    base = baseline['outcomes'] if baseline else {}
+    """Without a baseline run, a failing test has unknown provenance: it counts as
+    still failing (and is judged by whether it relates to the task), not as new."""
+    known = baseline is not None
+    base = baseline['outcomes'] if known else {}
     current = final['outcomes'] if final else {}
     comparison = {'fixed': [], 'broken': [], 'still_failing': [], 'new_passing': [], 'new_failing': [],
                   'missing': []}
     for test in sorted(current):
         now_failing = current[test] in FAILING
         if test not in base:
-            comparison['new_failing' if now_failing else 'new_passing'].append(test)
+            if now_failing and not known and test != SUITE_ID:
+                comparison['still_failing'].append(test)
+            else:
+                comparison['new_failing' if now_failing else 'new_passing'].append(test)
             continue
         before_failing = base[test] in FAILING
         if before_failing and not now_failing:
@@ -295,9 +324,9 @@ def check_syntax(path):
     if extension not in ('.py', '.json'):
         return ''
     try:
-        with open(path, 'r', encoding='utf-8') as handle:
+        with open(path, 'rb') as handle:
             source = handle.read()
-    except (OSError, UnicodeDecodeError) as error:
+    except OSError as error:
         return 'cannot read file: ' + str(error)
     if extension == '.json':
         try:
@@ -320,9 +349,24 @@ def add_check(checks, name, ok, detail):
     checks.append({'name': name, 'ok': ok, 'detail': detail})
 
 
+def node_matches(test_id, node):
+    """A plan may name a node id (file::test, file::Class, possibly without the
+    directory); parametrized ids carry a [suffix]."""
+    padded = '/' + test_id
+    if padded.endswith('/' + node):
+        return True
+    return ('/' + node + '::') in padded or ('/' + node + '[') in padded
+
+
 def test_belongs_to(test_id, paths):
+    """True when test_id is in one of the files, or is one of the node ids, in paths."""
     test_file = test_id.split('::')[0]
     for path in paths:
+        path = path[2:] if path.startswith('./') else path
+        if '::' in path:
+            if node_matches(test_id, path):
+                return True
+            continue
         if test_file == path or test_file.endswith('/' + path) or path.endswith('/' + test_file):
             return True
     return False
@@ -356,7 +400,10 @@ def verify_changes(repo_root, changed, baseline, test_command, plan, settings):
             warnings.append('existing test file changed: ' + item['path'])
 
     reproduction = plan['reproduction_command'] if plan and 'reproduction_command' in plan else ''
-    if reproduction:
+    refused = blocked_reason(reproduction) if reproduction else ''
+    if refused:
+        warnings.append('reproduction command skipped (' + refused + '): ' + reproduction[:200])
+    elif reproduction:
         result = execute_command(reproduction, repo_root, settings['command_timeout'], settings)
         ok = result['exit_code'] == 0 and not result['timed_out']
         detail = 'exit code {0}{1}\n{2}'.format(
@@ -382,8 +429,14 @@ def verify_changes(repo_root, changed, baseline, test_command, plan, settings):
             problems.append('new tests failing: ' + ', '.join(comparison['new_failing'][:10]))
         if related_failing:
             problems.append('task-related tests still failing: ' + ', '.join(related_failing[:10]))
-        if baseline and baseline['collected'] and not final['collected']:
-            problems.append('tests could not be collected (exit code {0})'.format(final['exit_code']))
+        if not final['collected'] and not final['timed_out']:
+            if final['exit_code'] not in (0, 5):
+                problems.append('tests could not run (exit code {0}), so there is no test evidence'.format(
+                    final['exit_code']))
+            elif baseline and baseline['collected']:
+                problems.append('tests could not be collected (exit code {0})'.format(final['exit_code']))
+            else:
+                warnings.append('no per-test results were collected; verification relies on the other checks')
         unrelated = [test for test in comparison['still_failing'] if test not in related_failing]
         if unrelated:
             warnings.append('pre-existing failures left unchanged: ' + ', '.join(unrelated[:10]))

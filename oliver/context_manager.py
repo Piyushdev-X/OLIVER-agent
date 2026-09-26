@@ -243,18 +243,23 @@ def extract_task_hints(task_text):
     }
 
 
+def same_file(rel_path, mention):
+    """Match whole path components only: "stats.py" must not match "test_stats.py"."""
+    mention = mention[2:] if mention.startswith('./') else mention
+    return (rel_path == mention or rel_path.endswith('/' + mention)
+            or mention.endswith('/' + rel_path))
+
+
 def score_file(rel_path, symbols, hints):
     lowered = rel_path.lower()
     word_set = set(hints['words'])
     identifier_set = set(hints['identifiers'])
     score = 0.0
     for mention in hints['paths']:
-        mention_lower = mention.lower().lstrip('./')
-        if lowered.endswith(mention_lower) or mention_lower.endswith(lowered):
+        if same_file(lowered, mention.lower()):
             score += 10.0
     for frame in hints['frames']:
-        frame_lower = frame.lower().replace('\\', '/')
-        if frame_lower.endswith(lowered):
+        if same_file(lowered, frame.lower().replace('\\', '/')):
             score += 8.0
     stem = os.path.splitext(os.path.basename(lowered))[0]
     if stem in word_set:

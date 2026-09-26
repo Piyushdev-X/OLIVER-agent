@@ -325,7 +325,9 @@ def call_from_json_text(block):
                 'error': 'tool_call block must hold a JSON object'}
     name = payload['name'] if 'name' in payload else ''
     arguments = payload['arguments'] if 'arguments' in payload else {}
-    return parse_tool_call('', name, arguments if isinstance(arguments, dict) else json.dumps(arguments))
+    if not isinstance(arguments, (dict, str)):
+        arguments = json.dumps(arguments)
+    return parse_tool_call('', name, arguments)
 
 
 # --- token counting ----------------------------------------------------------

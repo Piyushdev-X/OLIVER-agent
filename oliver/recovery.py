@@ -169,8 +169,32 @@ def init_snapshots(repo_root):
     os.makedirs(exclude_dir, exist_ok=True)
     with open(os.path.join(exclude_dir, 'exclude'), 'a', encoding='utf-8') as handle:
         handle.write('\n'.join(SHADOW_EXCLUDES) + '\n')
+    force_track_target_files(snapshot)
     snapshot['baseline'] = commit_all(snapshot, 'baseline')
     return snapshot
+
+
+def force_track_target_files(snapshot):
+    """The target's .gitignore files also apply to the shadow repo. Force-track every
+    file tracked by the target repository, so edits to tracked-but-ignored files
+    still show up in changed_files, the patch and rollbacks."""
+    work_tree = snapshot['work_tree']
+    if not os.path.isdir(os.path.join(work_tree, '.git')):
+        return
+    try:
+        listed = subprocess.run(['git', 'ls-files', '-z'], cwd=work_tree, capture_output=True, timeout=120)
+    except (OSError, subprocess.SubprocessError):
+        return
+    if listed.returncode != 0:
+        return
+    root = work_tree.encode('utf-8')
+    paths = [raw for raw in listed.stdout.split(b'\x00') if raw and os.path.isfile(os.path.join(root, raw))]
+    if not paths:
+        return
+    spec_file = os.path.join(snapshot['git_dir'], 'oliver-tracked-paths')
+    with open(spec_file, 'wb') as handle:
+        handle.write(b'\x00'.join(paths))
+    git_output(snapshot, ['add', '-f', '--pathspec-from-file=' + spec_file, '--pathspec-file-nul'])
 
 
 def commit_all(snapshot, message):

@@ -44,17 +44,6 @@ MAX_SEARCH_MATCHES = 60
 MAX_SEARCH_FILES = 25
 MAX_LIST_ENTRIES = 200
 
-BLOCKED_COMMANDS = [
-    (re.compile(r'\bgit\s+(push|commit|reset|checkout|switch|restore|rebase|merge|clean|stash|am|apply)\b'),
-     'git commands that change history or the working tree are managed by the harness'),
-    (re.compile(r'\b(curl|wget|ssh|scp|rsync|nc|ncat|telnet)\b'), 'network access is not available'),
-    (re.compile(r'\b(pip|pip3|npm|yarn|pnpm|apt|apt-get|brew|conda)\s+(install|add|i)\b'),
-     'installing packages is not allowed; work with the dependencies already installed'),
-    (re.compile(r'\bsudo\b'), 'sudo is not allowed'),
-    (re.compile(r'\b(shutdown|reboot|mkfs|dd)\b'), 'system commands are not allowed'),
-    (re.compile(r'\brm\s+-[a-zA-Z]*r[a-zA-Z]*\s+(/|~|\$HOME|\*)(\s|$)'), 'recursive deletes outside the project are not allowed'),
-    (re.compile(r':\(\)\s*\{'), 'fork bombs are not allowed'),
-]
 
 
 # --- context -----------------------------------------------------------------
@@ -94,12 +83,46 @@ def relative_path(absolute):
     return os.path.relpath(absolute, TOOL_CONTEXT['repo_root']).replace(os.sep, '/')
 
 
-def read_text_file(path):
+def read_raw(path):
     with open(path, 'rb') as handle:
-        data = handle.read()
-    if b'\x00' in data[:8192]:
+        return handle.read()
+
+
+def is_binary(data):
+    return b'\x00' in data[:8192]
+
+
+def read_text_file(path):
+    """Lossy decode for display and search only; edits use decode_for_edit."""
+    data = read_raw(path)
+    if is_binary(data):
         return None
     return data.decode('utf-8', 'replace')
+
+
+def decode_for_edit(data):
+    """Return (text, encoding). latin-1 round-trips any byte sequence exactly, so
+    editing a non-UTF-8 file never corrupts bytes outside the edited region."""
+    try:
+        return data.decode('utf-8'), 'utf-8'
+    except UnicodeDecodeError:
+        return data.decode('latin-1'), 'latin-1'
+
+
+def refresh_index(absolute):
+    """Keep the repository index current after the agent writes a file."""
+    index = TOOL_CONTEXT['index']
+    if not index:
+        return
+    rel = relative_path(absolute)
+    if rel not in index['files']:
+        index['files'].append(rel)
+        index['files'].sort()
+    extension = os.path.splitext(rel)[1].lower()
+    if extension in context_manager.SOURCE_EXTENSIONS:
+        text = read_text_file(absolute)
+        if text is not None:
+            index['symbols'][rel] = context_manager.extract_symbols(extension, text)
 
 
 def number_lines(lines, first_number):
@@ -142,18 +165,22 @@ def read_file(filepath: str, start_line: int = 1, end_line: int = 0) -> str:
     return header + '\n' + body
 
 
-def guarded_write(path, new_text, previous_text):
-    """Write, then syntax-check; restore previous content if the file breaks."""
-    with open(path, 'w', encoding='utf-8') as handle:
-        handle.write(new_text)
+def guarded_write(path, new_text, previous_bytes, encoding):
+    """Write, then syntax-check; restore the previous bytes exactly if the file breaks."""
+    try:
+        payload = new_text.encode(encoding)
+    except UnicodeEncodeError:
+        return 'the text has characters that cannot be stored in this ' + encoding + ' file'
+    with open(path, 'wb') as handle:
+        handle.write(payload)
     problem = verification.check_syntax(path)
     if not problem:
         return ''
-    if previous_text is None:
+    if previous_bytes is None:
         os.remove(path)
     else:
-        with open(path, 'w', encoding='utf-8') as handle:
-            handle.write(previous_text)
+        with open(path, 'wb') as handle:
+            handle.write(previous_bytes)
     return problem
 
 
@@ -167,17 +194,20 @@ def write_file(filepath: str, content: str) -> str:
     if len(content.encode('utf-8')) > MAX_WRITE_BYTES:
         return 'ERROR: content is larger than 1 MB'
     previous = None
+    encoding = 'utf-8'
     if os.path.isfile(path):
-        previous = read_text_file(path)
-        if previous is None:
+        previous = read_raw(path)
+        if is_binary(previous):
             return 'ERROR: refusing to overwrite a binary file'
+        encoding = decode_for_edit(previous)[1]
     parent = os.path.dirname(path)
     if not os.path.isdir(parent):
         os.makedirs(parent, exist_ok=True)
-    problem = guarded_write(path, content, previous)
+    problem = guarded_write(path, content, previous, encoding)
     if problem:
         return ('ERROR: the new content does not parse ({0}). The file was left unchanged. '
                 'Fix the syntax and call write_file again.').format(problem)
+    refresh_index(path)
     verb = 'Replaced' if previous is not None else 'Created'
     return '{0} {1} ({2} lines).'.format(verb, relative_path(path), len(content.splitlines()))
 
@@ -193,9 +223,10 @@ def edit_file(filepath: str, old_text: str, new_text: str) -> str:
         return 'ERROR: old_text must not be empty'
     if old_text == new_text:
         return 'ERROR: old_text and new_text are identical; nothing to change'
-    original = read_text_file(path)
-    if original is None:
+    raw = read_raw(path)
+    if is_binary(raw):
         return 'ERROR: ' + filepath + ' is a binary file'
+    original, encoding = decode_for_edit(raw)
     count = original.count(old_text)
     if count == 0:
         return 'ERROR: old_text was not found in ' + relative_path(path) + '.' + closest_region(original, old_text)
@@ -203,10 +234,11 @@ def edit_file(filepath: str, old_text: str, new_text: str) -> str:
         return ('ERROR: old_text matches {0} places in {1}. Include more surrounding lines so it '
                 'matches exactly once.').format(count, relative_path(path))
     updated = original.replace(old_text, new_text, 1)
-    problem = guarded_write(path, updated, original)
+    problem = guarded_write(path, updated, raw, encoding)
     if problem:
         return ('ERROR: this edit would break the file ({0}). The edit was rolled back; the file is '
                 'unchanged. Fix the new_text and try again.').format(problem)
+    refresh_index(path)
     start_line = original[:original.index(old_text)].count('\n') + 1
     new_lines = updated.splitlines()
     first = max(1, start_line - 3)
@@ -313,14 +345,13 @@ def text_matches(query, path_glob, regex):
 
 
 def python_text_matches(query, path_glob, regex):
-    index = TOOL_CONTEXT['index']
     root = TOOL_CONTEXT['repo_root']
     try:
         pattern = re.compile(query if regex else re.escape(query), 0 if query != query.lower() else re.IGNORECASE)
     except re.error as error:
         return [], 'ERROR: invalid regex: ' + str(error)
     results = []
-    for rel in index['files'] if index else []:
+    for rel in context_manager.list_repo_files(root):
         if path_glob and not fnmatch.fnmatch(rel, path_glob):
             continue
         try:
@@ -344,8 +375,7 @@ def list_files(path: str = '.', pattern: str = '') -> str:
         return error
     prefix = relative_path(target)
     prefix = '' if prefix == '.' else prefix.rstrip('/') + '/'
-    index = TOOL_CONTEXT['index']
-    files = index['files'] if index else context_manager.list_repo_files(TOOL_CONTEXT['repo_root'])
+    files = context_manager.list_repo_files(TOOL_CONTEXT['repo_root'])
     selected = []
     for rel in files:
         if prefix and not rel.startswith(prefix):
@@ -364,18 +394,11 @@ def list_files(path: str = '.', pattern: str = '') -> str:
 
 # --- execution tools ---------------------------------------------------------
 
-def blocked_reason(command):
-    for pattern, reason in BLOCKED_COMMANDS:
-        if pattern.search(command):
-            return reason
-    return ''
-
-
 def run_command(command: str, timeout_seconds: int = 120) -> str:
     """Run a shell command in the repository root (sandboxed, secrets removed)."""
     if not command.strip():
         return 'ERROR: command must not be empty'
-    reason = blocked_reason(command)
+    reason = verification.blocked_reason(command)
     if reason:
         return 'ERROR: command refused: ' + reason + '.'
     settings = TOOL_CONTEXT['settings']

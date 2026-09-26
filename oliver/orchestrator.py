@@ -103,6 +103,7 @@ def new_state(task, repo_path, settings):
         'execute_prompted': False,
         'replan_note': '',
         'best_checkpoint': '',
+        'best_verification': None,
         'stop_reason': '',
         'fatal_error': '',
         'finish_summary': '',
@@ -288,6 +289,7 @@ def phase_verify(state):
                  + verification.describe_verification(result))
     if result['passed']:
         state['best_checkpoint'] = sha
+        state['best_verification'] = result
         remember(state, 'fact', 'Verification passed at step ' + str(state['step']))
         if state['settings']['review'] and state['review_rounds'] < state['settings']['max_review_rounds']:
             return 'REVIEW'
@@ -487,10 +489,18 @@ def parse_plan(text):
         'root_cause': str(data['root_cause']),
         'files_to_change': as_string_list(data['files_to_change'] if 'files_to_change' in data else []),
         'steps': as_string_list(data['steps'])[:12],
-        'reproduction_command': str(data['reproduction_command']).strip() if 'reproduction_command' in data
-        and data['reproduction_command'] else '',
+        'reproduction_command': safe_reproduction(data),
         'tests_to_run': as_string_list(data['tests_to_run'] if 'tests_to_run' in data else []),
     }
+
+
+def safe_reproduction(data):
+    """The plan's reproduction command runs during verification, so it gets the
+    same blocklist as run_command; a refused command is dropped."""
+    if 'reproduction_command' not in data or not data['reproduction_command']:
+        return ''
+    command = str(data['reproduction_command']).strip()
+    return '' if verification.blocked_reason(command) else command
 
 
 def fallback_plan(state):
@@ -528,6 +538,7 @@ def finalize(state):
         try:
             if not verified and state['best_checkpoint']:
                 recovery.restore_checkpoint(snapshot, state['best_checkpoint'])
+                state['verification'] = state['best_verification']
                 verified = True
                 note = 'Restored the last verified checkpoint after: ' + (state['stop_reason'] or 'failure')
             patch = recovery.export_patch(snapshot)

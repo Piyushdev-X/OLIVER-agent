@@ -13,7 +13,7 @@
       "tokens": 7990,
       "cost": 0.0,
       "attempts": 0,
-      "seconds": 1.67
+      "seconds": 1.2
     },
     {
       "task": "inventory_total",
@@ -23,7 +23,7 @@
       "tokens": 16106,
       "cost": 0.0,
       "attempts": 1,
-      "seconds": 2.41
+      "seconds": 1.86
     },
     {
       "task": "leap_year",
@@ -33,7 +33,7 @@
       "tokens": 7302,
       "cost": 0.0,
       "attempts": 0,
-      "seconds": 1.82
+      "seconds": 1.31
     },
     {
       "task": "stats_average",
@@ -43,7 +43,7 @@
       "tokens": 10651,
       "cost": 0.0,
       "attempts": 0,
-      "seconds": 1.99
+      "seconds": 1.52
     },
     {
       "task": "text_slugify",
@@ -53,7 +53,7 @@
       "tokens": 10692,
       "cost": 0.0,
       "attempts": 0,
-      "seconds": 1.29
+      "seconds": 0.98
     },
     {
       "task": "word_count",
@@ -63,7 +63,7 @@
       "tokens": 6832,
       "cost": 0.0,
       "attempts": 0,
-      "seconds": 1.27
+      "seconds": 1.04
     }
   ]
 }
