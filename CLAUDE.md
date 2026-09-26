@@ -12,7 +12,7 @@ OLIVER is an autonomous planner-executor coding harness (LCC × DevClub AI Codin
 ## Hard coding rules (enforced by a PostToolUse hook and by the tests)
 
 1. Purely procedural Python: no class definitions, no decorators (including pytest fixtures), no meta-programming builtins (`exec`, `eval`, `setattr`, `getattr`, three-argument `type`).
-2. No instance-attribute access anywhere. The checker bans the four-letter receiver word in any case, in any file, including prose, so avoid words like "itself" and "yourself".
+2. No instance-attribute access anywhere. The checker bans the four-letter receiver word in any case, in any file, including prose, so avoid reflexive pronouns built on that word.
 3. No dictionary get-method calls: check `key in d`, then index with brackets. The checker also rejects any dotted get-prefixed call and any `get` followed by an opening parenthesis, so names ending in "get" (for example "target" or "budget" followed by a call) are out too. For environment variables use `os.environ[name]` after an `in` check.
 4. Web output (HTML, CSS, SVG, and HTML built in Python): no CSS custom properties and no var function, no media-query rules, a rigid 960px layout, and no timeline elements. Colors and sizes come from `docs/design/DESIGN_LANGUAGE.md`.
 5. The retired project name must not appear anywhere; the product is OLIVER.
