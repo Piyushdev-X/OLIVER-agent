@@ -20,11 +20,99 @@ make run
 
 `make run` opens the evaluation console and asks for the repository and the
 issue or test case. Nothing else needs to be installed, edited or configured.
+The [setup guide](#setup-guide) below covers prerequisites, the expected output
+of each step and troubleshooting.
 
-**Requirements:** Linux (glibc 2.28 or newer), macOS or WSL, with Python 3.10–3.14,
-git and bash on `PATH`, and network access to PyPI (for `make setup`) and to the
-model provider. ripgrep is used when present. Docker is only needed for
-`sandbox = "docker"`.
+## Setup guide
+
+Run every command from the repository folder, where the `Makefile` is.
+
+### 1. Check the prerequisites
+
+| Needed | Check | Install if missing |
+|---|---|---|
+| Python 3.10–3.14 | `python3 --version` | Ubuntu 22.04+ and Debian 12 ship one (`sudo apt-get install -y python3`). Fedora: `sudo dnf install -y python3`. macOS: `brew install python@3.12` (the system `python3` 3.9 is too old). |
+| git | `git --version` | `sudo apt-get install -y git`. macOS: `xcode-select --install`. |
+| make and bash | `make --version` | `sudo apt-get install -y make`. macOS: included with `xcode-select --install`. |
+| Network access | | PyPI during `make setup`, and the model provider's API during `make run`. GitHub only when a git or issue URL is given. |
+| ripgrep (optional) | `rg --version` | Faster repository search: `sudo apt-get install -y ripgrep` or `brew install ripgrep`. |
+
+- **Platforms.** Linux needs glibc 2.28 or newer (Ubuntu 20.04+, Debian 10+, RHEL 8+). macOS works on Intel and Apple silicon. On Windows, use WSL with Ubuntu.
+- **Not needed.** No system-wide Python packages, and no `python3-venv`. If venv support is missing, `make setup` installs pip from PyPI. Docker is only needed for `sandbox = "docker"`.
+
+### 2. Get the code and provide the credential
+
+```bash
+git clone <TEAM_REPOSITORY>
+cd <TEAM_REPOSITORY>
+export AI_API_KEY="<PROVIDED_API_KEY>"
+```
+
+OLIVER reads the key only from this environment variable. Never write it into a
+file in the repository. `make test` fails if a key is ever committed.
+
+### 3. Install with `make setup`
+
+`make setup` does the following:
+1. picks the first Python 3.10–3.14 on `PATH`;
+2. creates `.venv/`;
+3. installs the pinned dependencies from `dependency-files/requirements.txt` (usually under a minute);
+4. checks the result.
+
+The output ends like this:
+
+```text
+OLIVER installation check
+  Configuration  configuration-files/oliver.toml
+  Model          anthropic/claude-sonnet-5   from configuration-files/oliver.toml ([auto_models] anthropic)
+  AI_API_KEY     set (anthropic key format)
+  Python         3.12.3 at /path/to/repo/.venv/bin/python
+  Packages       litellm 1.102.1, pydantic 2.13.5, tree-sitter 0.26.0, tree-sitter-python 0.25.0, pytest 9.1.1
+  git            /usr/bin/git
+  ripgrep        /usr/bin/rg
+Ready. Start the harness with: make run
+Setup complete. Next: make run
+```
+
+To choose the interpreter, run `make setup PYTHON=python3.11`. Running
+`make setup` again is safe, and nothing is installed outside the repository
+folder.
+
+### 4. Model (set once by the team)
+
+The model is defined in `configuration-files/oliver.toml` (`model = "provider/model"`)
+and is printed by `make setup` and `make run`. Evaluators do not need to change it.
+[Model and credential](#model-and-credential) explains the options and overrides.
+
+### 5. Run with `make run`
+
+The console asks for the repository, the issue or test case, and optionally the
+test command (see [Evaluation mode](#evaluation-mode)). To solve one task without
+prompts, run `make run REPO=/path/to/repo ISSUE=/path/to/issue.md`.
+
+### 6. Optional: `make test`, then `make clean`
+
+`make test` takes about a minute, needs no credential and makes no API calls. It
+ends with the number of tests `passed` and `Resolved by hidden tests: 6/6`.
+`make clean` removes `.venv/`, `runs/` and `workspace/`, returning the folder to
+a fresh clone.
+
+### Troubleshooting
+
+| Message | Cause | What to do |
+|---|---|---|
+| `ERROR: OLIVER needs Python 3.10 to 3.14 and none was found` | No suitable Python on `PATH` | Install one (step 1), or name it: `make setup PYTHON=/path/to/python3.12` |
+| `ERROR: git is required` | git is missing | Install git (step 1) |
+| `This Python has no ensurepip (python3-venv); installing pip from PyPI instead` | Debian or Ubuntu Python without `python3-venv` | Nothing; setup continues |
+| `No matching distribution found for litellm==1.102.1` | Linux older than glibc 2.28, or a Python outside 3.10–3.14 | Use a newer system, or point `PYTHON=` at a supported Python |
+| `Cannot start: ... AI_API_KEY is not set` | The key is not exported in this shell | `export AI_API_KEY="<PROVIDED_API_KEY>"`, then `make run` |
+| `Cannot start: the provider of AI_API_KEY is not recognised` | `model = "auto"` cannot tell the provider from the key | Set `model` in `configuration-files/oliver.toml`, or `export OLIVER_MODEL=provider/model` |
+| `Checking the model... rejected` | The provider refused the key or the model id | Check that the key belongs to the provider named in `model` |
+| `Checking the model... no answer yet` | Network trouble or a rate limit | Nothing; tasks retry transient errors |
+| `Configuration error: ... unknown setting` | A typo in `configuration-files/oliver.toml` | Fix the key named in the message |
+| `Could not clone ...: the repository does not exist or is private` | Wrong URL, or no git credentials for a private repository | Check the URL, or clone it and enter the local path |
+| `Could not fetch <issue URL>` | The GitHub API is unreachable or rate limited | Paste the issue text instead |
+| `That directory contains the OLIVER harness` | The path points at this repository | Enter the repository to fix |
 
 ## Make targets
 
